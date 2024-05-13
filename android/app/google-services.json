@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "771185889083",
+    "firebase_url": "https://homeland-95f19-default-rtdb.firebaseio.com",
+    "project_id": "homeland-95f19",
+    "storage_bucket": "homeland-95f19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771185889083:android:71d4511c5407eb3312b11e",
+        "android_client_info": {
+          "package_name": "com.example.car_owner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJ0H1IflNFaMKt7Pnfu4uatPPQ4XvVnrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771185889083:android:a6764c974b01ee3b12b11e",
+        "android_client_info": {
+          "package_name": "com.example.driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJ0H1IflNFaMKt7Pnfu4uatPPQ4XvVnrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771185889083:android:9f667313b7cf6bab12b11e",
+        "android_client_info": {
+          "package_name": "com.example.users"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJ0H1IflNFaMKt7Pnfu4uatPPQ4XvVnrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
