@@ -28,6 +28,7 @@ Future<void> main() async{
       )
   );
    FirebaseDatabase.instance.setPersistenceEnabled(true);
+  //await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
 
   currentfirebaseUser= FirebaseAuth.instance.currentUser;
 

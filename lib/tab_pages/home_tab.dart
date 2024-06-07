@@ -1,41 +1,115 @@
-import 'package:car_owner/methods/car_registration_assistant_methods.dart';
 import 'package:car_owner/screens/car_register%20_screen.dart';
-import 'package:car_owner/tab_pages/driver_account_creation.dart';
+import 'package:car_owner/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import '../data_handler/app_data.dart';
+
+import '../screens/driver_account_creation.dart';
+import '../main.dart';
 
 class CarOwnerHomePage extends StatefulWidget {
   @override
   _CarOwnerHomePageState createState() => _CarOwnerHomePageState();
 }
 
-class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
-  // Add any state variables needed for car and driver registration
+class _CarOwnerHomePageState extends State<CarOwnerHomePage> with AutomaticKeepAliveClientMixin {
+  bool _isLoading = false;
+  int _carCount = 0;
+  int _driverCount = 0;
+  User? _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUser();
+  }
+
+  Future<void> _fetchCurrentUser() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        _currentUser = user;
+      });
+      await _fetchCounts();
+    } else {
+      print('No user is currently logged in.');
+    }
+  }
+
+  Future<void> _fetchCounts() async {
+    if (_currentUser == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      DatabaseReference userRef = FirebaseDatabase.instance.ref('car_owners').child(_currentUser!.uid);
+
+      userRef.child('cars').once().then((snapshot) {
+        setState(() {
+          _carCount = snapshot.snapshot.children.length;
+        });
+      });
+
+      userRef.child('drivers').once().then((snapshot) {
+        setState(() {
+          _driverCount = snapshot.snapshot.children.length;
+        });
+      });
+    } catch (e) {
+      print('Error fetching counts: $e');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _navigateAndLoad(Widget page) async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  }
+
+  Future<void> _navigateToDriverTab() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.popUntil(context, (route) => route.isFirst);
+    MainScreen.changeTab(context, 2); // 2 is the index of the Drivers tab
+  }
 
   @override
   Widget build(BuildContext context) {
+    AppData languageProvider = Provider.of<AppData>(context);
+    var language = languageProvider.isEnglishSelected;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.tealAccent,
-        title: Text('Car Owner Hub'),
-        actions: [
-          // Settings Menu Button
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              // Handle settings menu click (optional)
-              print('Settings Clicked');
-            },
-          ),
-        ],
+        title: Text(language ? 'Car Owner Hub' : "የመኪና ባለቤት ገጽ"),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Registration Section Title with modern text styling
             Text(
-              'Registration',
+              language ? 'Registration' : "ምዝገባ",
               style: TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
@@ -44,9 +118,8 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
             ),
             SizedBox(height: 10.0),
 
-            // Car Registration Section with rounded corners and elevated button
             Card(
-              elevation: 4.0, // Add a slight elevation for depth
+              elevation: 4.0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
@@ -55,7 +128,7 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                 child: Column(
                   children: [
                     Text(
-                      'Register Cars',
+                      language ? 'Register Cars' : "መኪኖች ይመዝገቡ",
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
@@ -63,14 +136,10 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    // Implement functionality to navigate to car registration page
                     ElevatedButton.icon(
-                      onPressed: () {
-                        // Navigate to car registration page
-                         Navigator.push(context, MaterialPageRoute(builder:(contex) =>  CarRegisterPage()));
-                      },
+                      onPressed: () => _navigateAndLoad(CarRegisterPage()),
                       icon: Icon(Icons.directions_car),
-                      label: Text('Register Car'),
+                      label: Text(language ? 'Register Car' : "መኪኖች ይመዝገቡ"),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: Colors.green,
@@ -86,7 +155,6 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
             ),
             SizedBox(height: 20.0),
 
-            // Driver Registration Section with similar styling
             Card(
               elevation: 4.0,
               shape: RoundedRectangleBorder(
@@ -97,7 +165,7 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                 child: Column(
                   children: [
                     Text(
-                      'Register Drivers',
+                      language ? 'Register Drivers' : "ነጂዎችን ይመዝገቡ",
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
@@ -105,14 +173,10 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    // Implement functionality to navigate to driver registration page
                     ElevatedButton.icon(
-                      onPressed: () {
-                        // Navigate to driver registration page
-                        Navigator.push(context, MaterialPageRoute(builder:(contex) =>  DriverRegistrationForm()));
-                      },
+                      onPressed: _navigateToDriverTab,
                       icon: Icon(Icons.person),
-                      label: Text('Register Driver'),
+                      label: Text(language ? 'Register Driver' : "ነጂዎችን ይመዝገቡ"),
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: Colors.teal,
@@ -128,7 +192,6 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
             ),
             SizedBox(height: 20.0),
 
-            // Essential Car Owner Information Card with divider
             Card(
               elevation: 4.0,
               shape: RoundedRectangleBorder(
@@ -139,7 +202,7 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                 child: Column(
                   children: [
                     Text(
-                      'Essential Information:',
+                      language ? 'Car and Driver Counts' : "የመኪና እና የአሽከርካሪዎች ብዛት",
                       style: TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
@@ -147,27 +210,20 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    Divider(
-                      // Add a divider line
-                      height: 1.0,
-                      thickness: 1.0,
-                      color: Colors.grey.shade300,
+                    Text(
+                      'Number of Cars: $_carCount',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black87,
+                      ),
                     ),
                     SizedBox(height: 10.0),
-                    ListTile(
-                      leading: Icon(Icons.assignment),
-                      title: Text('Insurance'),
-                      trailing: Icon(Icons.arrow_right),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.playlist_add_check),
-                      title: Text('Registration & Inspection'),
-                      trailing: Icon(Icons.arrow_right),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.local_gas_station),
-                      title: Text('Maintenance Records'),
-                      trailing: Icon(Icons.arrow_right),
+                    Text(
+                      'Number of Drivers: $_driverCount',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black87,
+                      ),
                     ),
                   ],
                 ),
@@ -178,4 +234,7 @@ class _CarOwnerHomePageState extends State<CarOwnerHomePage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

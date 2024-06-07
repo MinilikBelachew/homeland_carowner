@@ -48,6 +48,9 @@ dependencies:
   firebase_storage: ^11.7.5
   intl_phone_field: ^3.1.0
   shared_preferences: ^2.2.3
+  url_launcher:
+  encrypt:
+  flutter_secure_storage:
 
 
 
